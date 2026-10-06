@@ -1,0 +1,186 @@
+﻿@model homeWork_54.Models.TaskListViewModel
+
+@{
+    ViewData["Title"] = "Список задач";
+}
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-secondary mb-4 px-3">
+    <div class="navbar-nav">
+        <a class="nav-link active fw-bold" asp-action="Index">Все задачи</a>
+        <a class="nav-link text-white" asp-action="Create">Добавить задачу</a>
+    </div>
+</nav>
+
+<h3>Список задач</h3>
+
+
+<div class="card mb-4 bg-light">
+    <div class="card-body">
+        <form method="get" asp-action="Index" class="row g-3">
+            <input type="hidden" name="sortOrder" value="@Model.CurrentSort" />
+
+            <div class="col-md-3">
+                <label class="form-label">Заголовок</label>
+                <input type="text" name="searchTitle" value="@Model.SearchTitle" class="form-control" placeholder="Поиск по названию..." />
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label">Поиск в описании</label>
+                <input type="text" name="searchDescription" value="@Model.SearchDescription" class="form-control" placeholder="Слова из описания..." />
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label">Дата с</label>
+                <input type="date" name="dateFrom" value="@(Model.DateFrom?.ToString("yyyy-MM-dd"))" class="form-control" />
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label">Дата по</label>
+                <input type="date" name="dateTo" value="@(Model.DateTo?.ToString("yyyy-MM-dd"))" class="form-control" />
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label">Приоритет</label>
+                <select name="filterPriority" class="form-select" asp-for="FilterPriority" asp-items="Html.GetEnumSelectList<homeWork_54.Models.TaskPriority>()">
+                    <option value="">Все</option>
+                </select>
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label">Статус</label>
+                <select name="filterStatus" class="form-select" asp-for="FilterStatus" asp-items="Html.GetEnumSelectList<homeWork_54.Models.TodoStatus>()">
+                    <option value="">Все</option>
+                </select>
+            </div>
+
+            <div class="col-md-4 d-flex align-items-end gap-2">
+                <button type="submit" class="btn btn-primary">Применить фильтр</button>
+                <a asp-action="Index" class="btn btn-outline-secondary">Сброс</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+<table class="table table-bordered text-center align-middle">
+    <thead class="table-light">
+        <tr>
+            <th>Номер</th>
+            <th>
+                <a asp-action="Index" 
+                   asp-route-sortOrder="@(Model.CurrentSort == "title_asc" ? "title_desc" : "title_asc")"
+                   asp-route-searchTitle="@Model.SearchTitle" asp-route-searchDescription="@Model.SearchDescription"
+                   asp-route-dateFrom="@Model.DateFrom?.ToString("yyyy-MM-dd")" asp-route-dateTo="@Model.DateTo?.ToString("yyyy-MM-dd")"
+                   asp-route-filterPriority="@Model.FilterPriority" asp-route-filterStatus="@Model.FilterStatus">
+                    Название задачи
+                </a>
+            </th>
+            <th>
+                <a asp-action="Index" 
+                   asp-route-sortOrder="@(Model.CurrentSort == "priority_asc" ? "priority_desc" : "priority_asc")"
+                   asp-route-searchTitle="@Model.SearchTitle" asp-route-searchDescription="@Model.SearchDescription"
+                   asp-route-dateFrom="@Model.DateFrom?.ToString("yyyy-MM-dd")" asp-route-dateTo="@Model.DateTo?.ToString("yyyy-MM-dd")"
+                   asp-route-filterPriority="@Model.FilterPriority" asp-route-filterStatus="@Model.FilterStatus">
+                    Приоритет
+                </a>
+            </th>
+            <th>
+                <a asp-action="Index" 
+                   asp-route-sortOrder="@(Model.CurrentSort == "status_asc" ? "status_desc" : "status_asc")"
+                   asp-route-searchTitle="@Model.SearchTitle" asp-route-searchDescription="@Model.SearchDescription"
+                   asp-route-dateFrom="@Model.DateFrom?.ToString("yyyy-MM-dd")" asp-route-dateTo="@Model.DateTo?.ToString("yyyy-MM-dd")"
+                   asp-route-filterPriority="@Model.FilterPriority" asp-route-filterStatus="@Model.FilterStatus">
+                    Статус
+                </a>
+            </th>
+            <th>
+                <a asp-action="Index" 
+                   asp-route-sortOrder="@(Model.CurrentSort == "date_asc" ? "date_desc" : "date_asc")"
+                   asp-route-searchTitle="@Model.SearchTitle" asp-route-searchDescription="@Model.SearchDescription"
+                   asp-route-dateFrom="@Model.DateFrom?.ToString("yyyy-MM-dd")" asp-route-dateTo="@Model.DateTo?.ToString("yyyy-MM-dd")"
+                   asp-route-filterPriority="@Model.FilterPriority" asp-route-filterStatus="@Model.FilterStatus">
+                    Дата создания
+                </a>
+            </th>
+            <th>Действия</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var task in Model.Tasks)
+        {
+            <tr>
+                <td>@task.Id</td>
+                <td>@task.Title</td>
+                <td>
+                    @if (task.Priority == homeWork_54.Models.TaskPriority.High)
+                    {
+                        <span class="text-danger fw-bold">Высокий</span>
+                    }
+                    else if (task.Priority == homeWork_54.Models.TaskPriority.Medium)
+                    {
+                        <span class="text-primary fw-bold">Средний</span>
+                    }
+                    else
+                    {
+                        <span class="text-success fw-bold">Низкий</span>
+                    }
+                </td>
+                <td>
+                    @(task.Status == homeWork_54.Models.TodoStatus.New ? "Новая" :
+                      task.Status == homeWork_54.Models.TodoStatus.Opened ? "Открыта" : "Закрыта")
+                </td>
+                <td>@task.CreatedDate.ToString("dd.MM.yyyy HH:mm")</td>
+                <td>
+                    <div class="d-flex justify-content-center gap-1">
+                        @if (task.Status == homeWork_54.Models.TodoStatus.New)
+                        {
+                            <form asp-action="Open" asp-route-id="@task.Id" method="post">
+                                <button type="submit" class="btn btn-sm btn-outline-secondary">Открыть</button>
+                            </form>
+                        }
+                        else if (task.Status == homeWork_54.Models.TodoStatus.Opened)
+                        {
+                            <form asp-action="Close" asp-route-id="@task.Id" method="post">
+                                <button type="submit" class="btn btn-sm btn-outline-secondary">Закрыть</button>
+                            </form>
+                        }
+
+                        <a asp-action="Details" asp-route-id="@task.Id" class="btn btn-sm btn-outline-secondary">Детали</a>
+                        
+                        @if (task.Status != homeWork_54.Models.TodoStatus.Opened)
+                        {
+                            <form asp-action="Delete" asp-route-id="@task.Id" method="post">
+                                <button type="submit" class="btn btn-sm btn-outline-secondary">Удалить</button>
+                            </form>
+                        }
+                    </div>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+
+<nav>
+    <ul class="pagination justify-content-center">
+        <li class="page-item @(!Model.HasPreviousPage ? "disabled" : "")">
+            <a class="page-link" asp-action="Index" 
+               asp-route-page="@(Model.PageNumber - 1)"
+               asp-route-sortOrder="@Model.CurrentSort"
+               asp-route-searchTitle="@Model.SearchTitle" asp-route-searchDescription="@Model.SearchDescription"
+               asp-route-dateFrom="@Model.DateFrom?.ToString("yyyy-MM-dd")" asp-route-dateTo="@Model.DateTo?.ToString("yyyy-MM-dd")"
+               asp-route-filterPriority="@Model.FilterPriority" asp-route-filterStatus="@Model.FilterStatus">Предыдущая</a>
+        </li>
+        <li class="page-item disabled">
+            <span class="page-link">Страница @Model.PageNumber из @(Model.TotalPages == 0 ? 1 : Model.TotalPages)</span>
+        </li>
+        <li class="page-item @(!Model.HasNextPage ? "disabled" : "")">
+            <a class="page-link" asp-action="Index" 
+               asp-route-page="@(Model.PageNumber + 1)"
+               asp-route-sortOrder="@Model.CurrentSort"
+               asp-route-searchTitle="@Model.SearchTitle" asp-route-searchDescription="@Model.SearchDescription"
+               asp-route-dateFrom="@Model.DateFrom?.ToString("yyyy-MM-dd")" asp-route-dateTo="@Model.DateTo?.ToString("yyyy-MM-dd")"
+               asp-route-filterPriority="@Model.FilterPriority" asp-route-filterStatus="@Model.FilterStatus">Следующая</a>
+        </li>
+    </ul>
+</nav>
